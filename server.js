@@ -23,8 +23,10 @@ app.use(async (req, res, next) => {
   next();
 });
 
-const uploadsDir = path.join(__dirname, 'public', 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+if (!process.env.VERCEL) {
+  const uploadsDir = path.join(__dirname, 'public', 'uploads');
+  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),

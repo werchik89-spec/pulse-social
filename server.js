@@ -23,19 +23,22 @@ app.use(async (req, res, next) => {
   next();
 });
 
-if (!process.env.VERCEL) {
+let upload;
+if (process.env.VERCEL) {
+  const memStorage = multer.memoryStorage();
+  upload = multer({ storage: memStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+} else {
   const uploadsDir = path.join(__dirname, 'public', 'uploads');
   if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+  const diskStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadsDir),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, Date.now() + '_' + Math.random().toString(36).substr(2, 9) + ext);
+    }
+  });
+  upload = multer({ storage: diskStorage, limits: { fileSize: 5 * 1024 * 1024 } });
 }
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + '_' + Math.random().toString(36).substr(2, 9) + ext);
-  }
-});
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 let db;
 
@@ -72,9 +75,9 @@ function saveDb() {
 async function initDB() {
   let SQL;
   if (process.env.VERCEL) {
-    const resp = await fetch('https://sql.js.org/dist/sql-wasm.wasm');
-    const wasmBinary = await resp.arrayBuffer();
-    SQL = await initSqlJs({ wasmBinary: new Uint8Array(wasmBinary) });
+    const wasmB64 = require('./wasm-b64.js');
+    const wasmBinary = Buffer.from(wasmB64, 'base64');
+    SQL = await initSqlJs({ wasmBinary });
   } else {
     SQL = await initSqlJs({
       locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
@@ -275,16 +278,26 @@ app.put('/api/users/profile', authMiddleware, (req, res) => {
 
 app.post('/api/users/avatar', authMiddleware, upload.single('avatar'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Нет файла' });
-  const url = '/uploads/' + req.file.filename;
-  db.run(`UPDATE users SET avatar = '${url}' WHERE id = ${req.userId}`);
+  let url;
+  if (process.env.VERCEL) {
+    url = 'data:' + req.file.mimetype + ';base64,' + req.file.buffer.toString('base64');
+  } else {
+    url = '/uploads/' + req.file.filename;
+  }
+  db.run(`UPDATE users SET avatar = '${url.replace(/'/g, "''")}' WHERE id = ${req.userId}`);
   saveDb();
   res.json({ url });
 });
 
 app.post('/api/users/cover', authMiddleware, upload.single('cover'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Нет файла' });
-  const url = '/uploads/' + req.file.filename;
-  db.run(`UPDATE users SET cover = '${url}' WHERE id = ${req.userId}`);
+  let url;
+  if (process.env.VERCEL) {
+    url = 'data:' + req.file.mimetype + ';base64,' + req.file.buffer.toString('base64');
+  } else {
+    url = '/uploads/' + req.file.filename;
+  }
+  db.run(`UPDATE users SET cover = '${url.replace(/'/g, "''")}' WHERE id = ${req.userId}`);
   saveDb();
   res.json({ url });
 });
@@ -739,7 +752,11 @@ app.get('/api/suggested', authMiddleware, (req, res) => {
 // ===== UPLOAD =====
 app.post('/api/upload', authMiddleware, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Нет файла' });
-  res.json({ url: '/uploads/' + req.file.filename });
+  if (process.env.VERCEL) {
+    res.json({ url: 'data:' + req.file.mimetype + ';base64,' + req.file.buffer.toString('base64') });
+  } else {
+    res.json({ url: '/uploads/' + req.file.filename });
+  }
 });
 
 // SPA fallback

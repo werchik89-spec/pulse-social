@@ -1,0 +1,14 @@
+2026-07-28T05:38:45Z INF Thank you for trying Cloudflare Tunnel. Doing so, without a Cloudflare account, is a quick way to experiment and try it out. However, be aware that these account-less Tunnels have no uptime guarantee, are subject to the Cloudflare Online Services Terms of Use (https://www.cloudflare.com/website-terms/), and Cloudflare reserves the right to investigate your use of Tunnels for violations of such terms. If you intend to use Tunnels in production you should use a pre-created named tunnel by following: https://developers.cloudflare.com/cloudflare-one/connections/connect-apps
+2026-07-28T05:38:45Z INF Requesting new quick Tunnel on trycloudflare.com...
+2026-07-28T05:38:51Z INF +--------------------------------------------------------------------------------------------+
+2026-07-28T05:38:51Z INF |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
+2026-07-28T05:38:51Z INF |  https://prompt-roughly-helping-mumbai.trycloudflare.com                                   |
+2026-07-28T05:38:51Z INF +--------------------------------------------------------------------------------------------+
+2026-07-28T05:38:51Z INF Cannot determine default configuration path. No file [config.yml config.yaml] in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp]
+2026-07-28T05:38:51Z INF Version 2026.7.3 (Checksum 8635da433b6df8194746e88ed9d2589566c20e38bfc2a80e431a348b7c765841)
+2026-07-28T05:38:51Z INF GOOS: windows, GOVersion: go1.26.4, GoArch: amd64
+2026-07-28T05:38:51Z INF Settings: map[ha-connections:1 p:http protocol:http url:http://localhost:3000]
+2026-07-28T05:38:51Z INF cloudflared will not automatically update on Windows systems.
+2026-07-28T05:38:51Z INF Generated Connector ID: bb33ed19-9d40-4f4d-a808-ab4b4f4d4e04
+2026-07-28T05:38:51Z ERR Couldn't start tunnel error="unknown protocol http, Available protocols: 'auto' - automatically chooses the best protocol over time (the default; and also the recommended one); 'quic' - based on QUIC, relying on UDP egress to Cloudflare edge; 'http2' - using Go's HTTP2 library, relying on TCP egress to Cloudflare edge"
+unknown protocol http, Available protocols: 'auto' - automatically chooses the best protocol over time (the default; and also the recommended one); 'quic' - based on QUIC, relying on UDP egress to Cloudflare edge; 'http2' - using Go's HTTP2 library, relying on TCP egress to Cloudflare edge

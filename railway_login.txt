@@ -1,0 +1,5 @@
+
+  → Opening your browser to sign in — finish there.
+    https://backboard.railway.com/oauth/auth?response_type=code&client_id=rlwy_oaci_onEklvmksh1hRUiCo7E2zX12&redirect_uri=http%3A%2F%2F127.0.0.1%3A63732%2Fcallback&scope=openid+email+profile+offline_access+workspace%3Aadmin+project%3Aadmin+ssh_keys&code_challenge=YWHkO7kF88osBgzBW8pT73wshnJK6lhfgChokfzogJQ&code_challenge_method=S256&state=XFLLMYk-I8Osv1J_p9-zwe6q51fkinh1GDK34NApJro&prompt=consent&cli_caller=opencode
+
+  ✓ Signed in as werchik89@gmail.com

@@ -16,6 +16,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(async (req, res, next) => {
+  if (process.env.VERCEL && !db) {
+    await dbReady;
+  }
+  next();
+});
+
 const uploadsDir = path.join(__dirname, 'public', 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
@@ -54,6 +61,7 @@ function optionalAuth(req, res, next) {
 }
 
 function saveDb() {
+  if (process.env.VERCEL) return;
   const data = db.export();
   const buffer = Buffer.from(data);
   fs.writeFileSync(DB_FILE, buffer);
@@ -63,7 +71,7 @@ async function initDB() {
   const SQL = await initSqlJs({
     locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
   });
-  if (fs.existsSync(DB_FILE)) {
+  if (!process.env.VERCEL && fs.existsSync(DB_FILE)) {
     const fileBuffer = fs.readFileSync(DB_FILE);
     db = new SQL.Database(fileBuffer);
   } else {
@@ -730,11 +738,17 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`\n  ╔══════════════════════════════════════╗`);
-    console.log(`  ║   PULSE Social Network running on    ║`);
-    console.log(`  ║   http://localhost:${PORT}              ║`);
-    console.log(`  ╚══════════════════════════════════════╝\n`);
+const dbReady = initDB();
+
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  dbReady.then(() => {
+    app.listen(PORT, () => {
+      console.log(`\n  ╔══════════════════════════════════════╗`);
+      console.log(`  ║   PULSE Social Network running on    ║`);
+      console.log(`  ║   http://localhost:${PORT}              ║`);
+      console.log(`  ╚══════════════════════════════════════╝\n`);
+    });
   });
-});
+}

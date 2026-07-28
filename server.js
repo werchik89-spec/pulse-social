@@ -70,14 +70,16 @@ function saveDb() {
 }
 
 async function initDB() {
-  const SQL = await initSqlJs({
-    locateFile: file => {
-      if (process.env.VERCEL) {
-        return `https://sql.js.org/dist/${file}`;
-      }
-      return path.join(__dirname, 'node_modules', 'sql.js', 'dist', file);
-    }
-  });
+  let SQL;
+  if (process.env.VERCEL) {
+    const resp = await fetch('https://sql.js.org/dist/sql-wasm.wasm');
+    const wasmBinary = await resp.arrayBuffer();
+    SQL = await initSqlJs({ wasmBinary: new Uint8Array(wasmBinary) });
+  } else {
+    SQL = await initSqlJs({
+      locateFile: file => path.join(__dirname, 'node_modules', 'sql.js', 'dist', file)
+    });
+  }
   if (!process.env.VERCEL && fs.existsSync(DB_FILE)) {
     const fileBuffer = fs.readFileSync(DB_FILE);
     db = new SQL.Database(fileBuffer);
